@@ -1,0 +1,47 @@
+{
+  "name": "appbundle-liveupdate",
+  "version": "1.0.0",
+  "description": "LiveUpdate upload utility",
+  "scripts": {
+    "clean": "rm -rf bin node_modules dist",
+    "prebuild": "rimraf dist",
+    "build": "ncc build src/index.ts -o dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:wearesho-team/appbundle-liveupdate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wearesho-team/appbundle-liveupdate/issues"
+  },
+  "homepage": "https://github.com/wearesho-team/appbundle-liveupdate#readme",
+  "author": "Wearesho Team",
+  "contributors": [
+    {
+      "name": "Denys Galkin",
+      "email": "trinitiwowka@gmail.com",
+      "url": "https://example.com"
+    }
+  ],
+  "exports": {
+    ".": "./dist/index.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@types/archiver": "^6.0.2",
+    "archiver": "^7.0.1",
+    "axios": "^1.7.1",
+    "form-data": "^4.0.0",
+    "typescript": "^5.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@vercel/ncc": "^0.38.1",
+    "commit-and-tag-version": "^12.4.0",
+    "rimraf": "^5.0.7"
+  }
+}

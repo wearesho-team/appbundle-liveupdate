@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "baseUrl": "./src",
+        "outDir": "./dist/",
+        "target": "es5",
+        "lib": ["es6", "es2018", "es2019", "es2022"],
+        "module": "esnext",
+        "downlevelIteration": true,
+        "strict": true,
+        "sourceMap": false,
+        "removeComments": false,
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true,
+        "skipDefaultLibCheck": true,
+        "allowJs": true,
+        "experimentalDecorators": true,
+        "useUnknownInCatchVariables": false,
+        "typeRoots": [
+            "src/custom-types",
+            "node_modules/@types"
+        ],
+    },
+    "exclude": [
+        "node_modules",
+        "dist",
+    ]
+}

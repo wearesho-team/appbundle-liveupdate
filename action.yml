@@ -1,0 +1,24 @@
+name: 'LiveUpdate upload utility'
+description: 'Deploy live updates to your server'
+author: 'Denys Galkin <trinitiwowka@gmail.com>'
+
+inputs:
+  mode:
+    description: 'The mode to run the action. Can be either "rollout" or "rollback".'
+    required: true
+  baseUrl:
+    description: 'The base URL of the server to deploy the bundle to.'
+    required: true
+  accessToken:
+    description: 'The Authorisation token to access the server.'
+    required: true
+  path:
+    description: 'The path to the bundle to upload. Must be a folder or zip archive.'
+  channel:
+    description: 'The channel to deploy the bundle to.'
+  version:
+    description: 'The version of the bundle to deploy(within the channel).'
+
+runs:
+  using: node20
+  main: dist/index.js
