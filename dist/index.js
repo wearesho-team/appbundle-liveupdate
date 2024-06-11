@@ -72753,7 +72753,7 @@ var LiveUpdate = /** @class */ (function () {
             return live_update_generator(this, function (_m) {
                 switch (_m.label) {
                     case 0:
-                        core.info("Getting latest bundle for channel: ".concat(channel, " ..."));
+                        core.info("Getting latest bundle for channel: ".concat(channel, "..."));
                         _m.label = 1;
                     case 1:
                         _m.trys.push([1, 3, , 4]);
