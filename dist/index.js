@@ -73005,7 +73005,7 @@ var init = function () { return src_awaiter(void 0, void 0, void 0, function () 
             case 1:
                 latestVersion = _h.sent();
                 if (!latestVersion) {
-                    latestVersion = '1.0.0';
+                    latestVersion = '1';
                 }
                 else {
                     _a = __read(latestVersion.split('.').map(Number), 3), major = _a[0], minor = _a[1], patch = _a[2];
