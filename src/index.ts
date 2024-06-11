@@ -27,7 +27,7 @@ const init = async () => {
         let latestVersion: string | undefined = await LiveUpdateInstance.getLatestVersion(channel);
 
         if (!latestVersion) {
-            latestVersion = '1.0.0';
+            latestVersion = '1';
         } else {
             const [major, minor, patch] = latestVersion.split('.').map(Number);
             latestVersion = `${major}.${minor}.${patch + 1}`;
