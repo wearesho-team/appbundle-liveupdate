@@ -72978,7 +72978,7 @@ var __values = (undefined && undefined.__values) || function(o) {
 
 
 var init = function () { return src_awaiter(void 0, void 0, void 0, function () {
-    var mode, baseUrl, accessToken, LiveUpdateInstance, folderPath, channel, latestVersion, _a, major, minor, patch, isActivateMode, channelInput, versionInput, versionsFromServer, _b, _c, item, e_1_1, getAllBranchesResponse, _d, _e, branchItem, e_2_1, error_1;
+    var mode, baseUrl, accessToken, LiveUpdateInstance, folderPath, channel, latestVersion, _a, major, minor, patch, version, isActivateMode, channelInput, versionInput, versionsFromServer, _b, _c, item, e_1_1, getAllBranchesResponse, _d, _e, branchItem, e_2_1, error_1;
     var e_1, _f, e_2, _g;
     return src_generator(this, function (_h) {
         switch (_h.label) {
@@ -73008,8 +73008,15 @@ var init = function () { return src_awaiter(void 0, void 0, void 0, function () 
                     latestVersion = '1';
                 }
                 else {
-                    _a = __read(latestVersion.split('.').map(Number), 3), major = _a[0], minor = _a[1], patch = _a[2];
-                    latestVersion = "".concat(major, ".").concat(minor, ".").concat(patch + 1);
+                    if (latestVersion.includes(".")) {
+                        _a = __read(latestVersion.split('.').map(Number), 3), major = _a[0], minor = _a[1], patch = _a[2];
+                        latestVersion = "".concat(major, ".").concat(minor, ".").concat(patch + 1);
+                    }
+                    else {
+                        version = parseInt(latestVersion);
+                        version++;
+                        latestVersion = "".concat(version);
+                    }
                 }
                 return [4 /*yield*/, LiveUpdateInstance.uploadNewRelease({ channel: channel, version: latestVersion, folderPath: folderPath })];
             case 2:
