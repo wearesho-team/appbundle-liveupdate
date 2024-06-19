@@ -29,8 +29,14 @@ const init = async () => {
         if (!latestVersion) {
             latestVersion = '1';
         } else {
-            const [major, minor, patch] = latestVersion.split('.').map(Number);
-            latestVersion = `${major}.${minor}.${patch + 1}`;
+            if(latestVersion.includes(".")) {
+              const [major, minor, patch] = latestVersion.split('.').map(Number);
+              latestVersion = `${major}.${minor}.${patch + 1}`;
+            } else {
+              let version = parseInt(latestVersion);
+              version++;
+              latestVersion = `${version}`;
+            }
         }
 
         await LiveUpdateInstance.uploadNewRelease({channel, version: latestVersion, folderPath});
