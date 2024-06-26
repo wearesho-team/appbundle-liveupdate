@@ -1,6 +1,20 @@
 import * as core from '@actions/core'
 import {LiveUpdate} from "./live-update";
-import {Bundle} from "./types";
+import {AxiosError} from "axios";
+import * as console from "node:console";
+
+const updateVersion = (version: string | null) => {
+    if (!version) {
+        return '1';
+    }
+
+    if(version.includes(".")) {
+        const [major, minor, patch] = version.split('.').map(Number);
+        return `${major}.${minor}.${patch + 1}`;
+    }
+
+    return `${parseInt(version) + 1}`;
+}
 
 const init = async () => {
   try {
@@ -24,23 +38,26 @@ const init = async () => {
           required: true
         })
 
-        let latestVersion: string | undefined = await LiveUpdateInstance.getLatestVersion(channel);
+        let latestVersion: string | null = null;
 
-        if (!latestVersion) {
-            latestVersion = '1';
-        } else {
-            if(latestVersion.includes(".")) {
-              const [major, minor, patch] = latestVersion.split('.').map(Number);
-              latestVersion = `${major}.${minor}.${patch + 1}`;
-            } else {
-              let version = parseInt(latestVersion);
-              version++;
-              latestVersion = `${version}`;
-            }
+        try {
+            latestVersion = await LiveUpdateInstance.getLatestVersion(channel);
+        } catch (error) {
+          if (error instanceof AxiosError) {
+              console.warn(error.response?.data?.message)
+          } else {
+              console.warn(`Failed to fetch latest bundle: ${error.message}`);
+          }
         }
 
-        await LiveUpdateInstance.uploadNewRelease({channel, version: latestVersion, folderPath});
-        await LiveUpdateInstance.setBundleToUse({channel, version: latestVersion, active: true});
+        latestVersion = updateVersion(latestVersion);
+
+        const uploadedVersion: string | null = await LiveUpdateInstance.uploadNewRelease({channel, version: latestVersion, folderPath});
+
+        if (uploadedVersion) {
+            await LiveUpdateInstance.setBundleToUse({channel, version: latestVersion, active: true});
+        }
+
         return;
     }
 

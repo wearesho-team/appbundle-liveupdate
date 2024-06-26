@@ -32,25 +32,26 @@ export class LiveUpdate {
         }
     }
 
-    getLatestVersion = async (channel: string): Promise<string | undefined> => {
-        core.info(`Getting latest bundle for channel: ${channel}...`)
+    getLatestActiveVersion = async (channel: string): Promise<string | undefined> => {
+        core.info(`Getting latest active bundle for channel: ${channel}...`)
 
-        try {
-            const response = await this.api.get(
-                `latest?branch=${channel}`
-            )
-            core.info('Latest bundle successfully fetched')
-            core.info(`Response: ${JSON.stringify(response.data, null, 2)}`)
-            core.info(`Bundle ID: ${response.data?.bundle?.bundle?.version}`);
-            core.setOutput('latestVersionOnServer', response.data?.bundle?.bundle?.version);
-            return response.data?.bundle?.bundle?.version;
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                core.error(error.response?.data?.message)
-            } else {
-                core.error(`Failed to fetch latest bundle: ${error.message}`);
-            }
-        }
+        const response = await this.api.get(
+            `latest?branch=${channel}`
+        );
+
+        core.info('Latest bundle successfully fetched');
+        core.info(`Response: ${JSON.stringify(response.data, null, 2)}`);
+        core.info(`Bundle ID: ${response.data?.bundle?.bundle?.version}`);
+        core.setOutput('latestVersionOnServer', response.data?.bundle?.bundle?.version);
+        return response.data?.bundle?.bundle?.version;
+    }
+
+    getLatestVersion = async (channel: string): Promise<string | null> => {
+        core.info(`Getting latest bundle for channel: ${channel}...`);
+
+        const allVersions = await this.getAllVersions(channel);
+
+        return allVersions?.bundles[0].bundle.version || null;
     }
 
     getAllVersions = async (channel: string): Promise<GetAllVersionsResponse | null> => {
@@ -94,7 +95,7 @@ export class LiveUpdate {
         }
     }
 
-    uploadNewRelease = async ({channel, version, folderPath}: {channel: string, version: string, folderPath: string}) => {
+    uploadNewRelease = async ({channel, version, folderPath}: {channel: string, version: string, folderPath: string}): Promise<string | null> => {
         const formData = new FormData()
 
         if (isZipped(folderPath)) {
@@ -108,6 +109,7 @@ export class LiveUpdate {
             } catch (error) {
                 core.error('Zipping error');
                 core.setFailed(`Zipping error: ${error.message}`);
+                return null;
             }
 
             formData.append('Bundle[file]', zipBuffer, { filename: 'bundle.zip' })
@@ -129,16 +131,14 @@ export class LiveUpdate {
 
             core.info('Bundle successfully created')
             core.info(`Response: ${JSON.stringify(response.data, null, 2)}`)
-            core.info(`Bundle ID: ${response.data?.bundle?.bundle?.version}`);
             if (uploadedVersion) {
-                core.setOutput('UploadedVersion', response.data?.bundle?.bundle?.version);
+                core.setOutput('UploadedVersion', uploadedVersion);
+                return <string>uploadedVersion;
             }
         } catch (error) {
-            if (error instanceof AxiosError) {
-                core.setFailed(error.response?.data?.message)
-            } else {
-                core.setFailed(`Failed to create bundle: ${error.message}`);
-            }
+            core.setFailed(`Failed to create bundle: ${error}`);
         }
+
+        return null;
     }
 }
