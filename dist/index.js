@@ -67539,6 +67539,11 @@ var __webpack_exports__ = {};
 // ESM COMPAT FLAG
 __nccwpck_require__.r(__webpack_exports__);
 
+// EXPORTS
+__nccwpck_require__.d(__webpack_exports__, {
+  "ModeEnum": () => (/* binding */ ModeEnum)
+});
+
 // NAMESPACE OBJECT: ./node_modules/axios/lib/platform/common/utils.js
 var common_utils_namespaceObject = {};
 __nccwpck_require__.r(common_utils_namespaceObject);
@@ -72678,6 +72683,34 @@ const {
 
 
 
+;// CONCATENATED MODULE: ./src/helpers/update-version.ts
+var __read = (undefined && undefined.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var updateVersion = function (version) {
+    if (!version) {
+        return '1';
+    }
+    if (version.includes(".")) {
+        var _a = __read(version.split('.').map(Number), 3), major = _a[0], minor = _a[1], patch = _a[2];
+        return "".concat(major || 1, ".").concat(minor || 1, ".").concat((patch || 0) + 1);
+    }
+    return "".concat(parseInt(version) + 1);
+};
+
 ;// CONCATENATED MODULE: ./src/live-update.ts
 var live_update_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -72720,6 +72753,7 @@ var live_update_generator = (undefined && undefined.__generator) || function (th
 
 
 
+
 var LiveUpdate = /** @class */ (function () {
     function LiveUpdate(baseUrl, privateKey) {
         var _this = this;
@@ -72747,39 +72781,47 @@ var LiveUpdate = /** @class */ (function () {
                 }
             });
         }); };
-        this.getLatestVersion = function (channel) { return live_update_awaiter(_this, void 0, void 0, function () {
-            var response, error_2;
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
-            return live_update_generator(this, function (_m) {
-                switch (_m.label) {
+        this.getLatestActiveVersion = function (channel) { return live_update_awaiter(_this, void 0, void 0, function () {
+            var response, version;
+            var _a, _b, _c;
+            return live_update_generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
-                        core.info("Getting latest bundle for channel: ".concat(channel, "..."));
-                        _m.label = 1;
-                    case 1:
-                        _m.trys.push([1, 3, , 4]);
+                        core.info("Getting latest active bundle for channel: ".concat(channel, "..."));
                         return [4 /*yield*/, this.api.get("latest?branch=".concat(channel))];
-                    case 2:
-                        response = _m.sent();
+                    case 1:
+                        response = _d.sent();
+                        version = (_c = (_b = (_a = response.data) === null || _a === void 0 ? void 0 : _a.bundle) === null || _b === void 0 ? void 0 : _b.bundle) === null || _c === void 0 ? void 0 : _c.version;
                         core.info('Latest bundle successfully fetched');
                         core.info("Response: ".concat(JSON.stringify(response.data, null, 2)));
-                        core.info("Bundle ID: ".concat((_c = (_b = (_a = response.data) === null || _a === void 0 ? void 0 : _a.bundle) === null || _b === void 0 ? void 0 : _b.bundle) === null || _c === void 0 ? void 0 : _c.version));
-                        core.setOutput('latestVersionOnServer', (_f = (_e = (_d = response.data) === null || _d === void 0 ? void 0 : _d.bundle) === null || _e === void 0 ? void 0 : _e.bundle) === null || _f === void 0 ? void 0 : _f.version);
-                        return [2 /*return*/, (_j = (_h = (_g = response.data) === null || _g === void 0 ? void 0 : _g.bundle) === null || _h === void 0 ? void 0 : _h.bundle) === null || _j === void 0 ? void 0 : _j.version];
-                    case 3:
-                        error_2 = _m.sent();
-                        if (error_2 instanceof axios_AxiosError) {
-                            core.error((_l = (_k = error_2.response) === null || _k === void 0 ? void 0 : _k.data) === null || _l === void 0 ? void 0 : _l.message);
+                        core.setOutput('latestVersionOnServer', version);
+                        core.setOutput('nextVersionOnServer', updateVersion(version));
+                        return [2 /*return*/, version];
+                }
+            });
+        }); };
+        this.getLatestVersion = function (channel) { return live_update_awaiter(_this, void 0, void 0, function () {
+            var allVersions, version;
+            var _a, _b, _c;
+            return live_update_generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        core.info("Getting latest bundle for channel: ".concat(channel, "..."));
+                        return [4 /*yield*/, this.getAllVersions(channel)];
+                    case 1:
+                        allVersions = _d.sent();
+                        version = null;
+                        if (((_a = allVersions === null || allVersions === void 0 ? void 0 : allVersions.bundles) === null || _a === void 0 ? void 0 : _a.length) && ((_b = allVersions === null || allVersions === void 0 ? void 0 : allVersions.bundles) === null || _b === void 0 ? void 0 : _b.length) > 0) {
+                            version = ((_c = allVersions.bundles[0].bundle) === null || _c === void 0 ? void 0 : _c.version) || null;
                         }
-                        else {
-                            core.error("Failed to fetch latest bundle: ".concat(error_2.message));
-                        }
-                        return [3 /*break*/, 4];
-                    case 4: return [2 /*return*/];
+                        core.setOutput('latestVersionOnServer', version);
+                        core.setOutput('nextVersionOnServer', updateVersion(version));
+                        return [2 /*return*/, version];
                 }
             });
         }); };
         this.getAllVersions = function (channel) { return live_update_awaiter(_this, void 0, void 0, function () {
-            var response, error_3;
+            var response, error_2;
             var _a, _b;
             return live_update_generator(this, function (_c) {
                 switch (_c.label) {
@@ -72792,12 +72834,12 @@ var LiveUpdate = /** @class */ (function () {
                         core.info("Response: ".concat(JSON.stringify(response.data, null, 2)));
                         return [2 /*return*/, response.data];
                     case 2:
-                        error_3 = _c.sent();
-                        if (error_3 instanceof axios_AxiosError) {
-                            core.setFailed((_b = (_a = error_3.response) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.message);
+                        error_2 = _c.sent();
+                        if (error_2 instanceof axios_AxiosError) {
+                            core.setFailed((_b = (_a = error_2.response) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.message);
                         }
                         else {
-                            core.setFailed("Failed to fetch all versions for channel:".concat(channel, ": ").concat(error_3.message));
+                            core.setFailed("Failed to fetch all versions for channel:".concat(channel, ": ").concat(error_2.message));
                         }
                         return [2 /*return*/, null];
                     case 3: return [2 /*return*/];
@@ -72805,7 +72847,7 @@ var LiveUpdate = /** @class */ (function () {
             });
         }); };
         this.setBundleToUse = function (_a) { return live_update_awaiter(_this, [_a], void 0, function (_b) {
-            var response, error_4;
+            var response, error_3;
             var _c, _d, _e, _f, _g;
             var channel = _b.channel, version = _b.version, active = _b.active;
             return live_update_generator(this, function (_h) {
@@ -72827,12 +72869,12 @@ var LiveUpdate = /** @class */ (function () {
                         core.info("Bundle ID: ".concat((_e = (_d = (_c = response.data) === null || _c === void 0 ? void 0 : _c.bundle) === null || _d === void 0 ? void 0 : _d.bundle) === null || _e === void 0 ? void 0 : _e.version));
                         return [3 /*break*/, 4];
                     case 3:
-                        error_4 = _h.sent();
-                        if (error_4 instanceof axios_AxiosError) {
-                            core.setFailed((_g = (_f = error_4.response) === null || _f === void 0 ? void 0 : _f.data) === null || _g === void 0 ? void 0 : _g.message);
+                        error_3 = _h.sent();
+                        if (error_3 instanceof axios_AxiosError) {
+                            core.setFailed((_g = (_f = error_3.response) === null || _f === void 0 ? void 0 : _f.data) === null || _g === void 0 ? void 0 : _g.message);
                         }
                         else {
-                            core.setFailed("Failed to update bundle: ".concat(error_4.message));
+                            core.setFailed("Failed to update bundle: ".concat(error_3.message));
                         }
                         return [3 /*break*/, 4];
                     case 4: return [2 /*return*/];
@@ -72840,11 +72882,11 @@ var LiveUpdate = /** @class */ (function () {
             });
         }); };
         this.uploadNewRelease = function (_a) { return live_update_awaiter(_this, [_a], void 0, function (_b) {
-            var formData, zipBuffer, error_5, response, uploadedVersion, error_6;
-            var _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+            var formData, zipBuffer, error_4, response, uploadedVersion, error_5;
+            var _c, _d, _e;
             var channel = _b.channel, version = _b.version, folderPath = _b.folderPath;
-            return live_update_generator(this, function (_p) {
-                switch (_p.label) {
+            return live_update_generator(this, function (_f) {
+                switch (_f.label) {
                     case 0:
                         formData = new (form_data_default())();
                         if (!isZipped(folderPath)) return [3 /*break*/, 1];
@@ -72853,49 +72895,44 @@ var LiveUpdate = /** @class */ (function () {
                     case 1:
                         core.info('Zipping folder...');
                         zipBuffer = void 0;
-                        _p.label = 2;
+                        _f.label = 2;
                     case 2:
-                        _p.trys.push([2, 4, , 5]);
+                        _f.trys.push([2, 4, , 5]);
                         return [4 /*yield*/, zipFolder(folderPath)];
                     case 3:
-                        zipBuffer = _p.sent();
+                        zipBuffer = _f.sent();
                         return [3 /*break*/, 5];
                     case 4:
-                        error_5 = _p.sent();
+                        error_4 = _f.sent();
                         core.error('Zipping error');
-                        core.setFailed("Zipping error: ".concat(error_5.message));
-                        return [3 /*break*/, 5];
+                        core.setFailed("Zipping error: ".concat(error_4.message));
+                        return [2 /*return*/, null];
                     case 5:
                         formData.append('Bundle[file]', zipBuffer, { filename: 'bundle.zip' });
-                        _p.label = 6;
+                        _f.label = 6;
                     case 6:
                         formData.append('Bundle[branch]', channel);
                         formData.append('Bundle[version]', version);
                         core.info("Uploading channel:".concat(channel, ", version:").concat(version, " ..."));
-                        _p.label = 7;
+                        _f.label = 7;
                     case 7:
-                        _p.trys.push([7, 9, , 10]);
+                        _f.trys.push([7, 9, , 10]);
                         return [4 /*yield*/, this.api.post("bundle", formData)];
                     case 8:
-                        response = _p.sent();
+                        response = _f.sent();
                         uploadedVersion = (_e = (_d = (_c = response.data) === null || _c === void 0 ? void 0 : _c.bundle) === null || _d === void 0 ? void 0 : _d.bundle) === null || _e === void 0 ? void 0 : _e.version;
                         core.info('Bundle successfully created');
                         core.info("Response: ".concat(JSON.stringify(response.data, null, 2)));
-                        core.info("Bundle ID: ".concat((_h = (_g = (_f = response.data) === null || _f === void 0 ? void 0 : _f.bundle) === null || _g === void 0 ? void 0 : _g.bundle) === null || _h === void 0 ? void 0 : _h.version));
                         if (uploadedVersion) {
-                            core.setOutput('UploadedVersion', (_l = (_k = (_j = response.data) === null || _j === void 0 ? void 0 : _j.bundle) === null || _k === void 0 ? void 0 : _k.bundle) === null || _l === void 0 ? void 0 : _l.version);
+                            core.setOutput('UploadedVersion', uploadedVersion);
+                            return [2 /*return*/, uploadedVersion];
                         }
                         return [3 /*break*/, 10];
                     case 9:
-                        error_6 = _p.sent();
-                        if (error_6 instanceof axios_AxiosError) {
-                            core.setFailed((_o = (_m = error_6.response) === null || _m === void 0 ? void 0 : _m.data) === null || _o === void 0 ? void 0 : _o.message);
-                        }
-                        else {
-                            core.setFailed("Failed to create bundle: ".concat(error_6.message));
-                        }
+                        error_5 = _f.sent();
+                        core.setFailed("Failed to create bundle: ".concat(error_5));
                         return [3 /*break*/, 10];
-                    case 10: return [2 /*return*/];
+                    case 10: return [2 /*return*/, null];
                 }
             });
         }); };
@@ -72911,6 +72948,8 @@ var LiveUpdate = /** @class */ (function () {
 }());
 
 
+;// CONCATENATED MODULE: external "node:console"
+const external_node_console_namespaceObject = require("node:console");
 ;// CONCATENATED MODULE: ./src/index.ts
 var src_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -72948,22 +72987,6 @@ var src_generator = (undefined && undefined.__generator) || function (thisArg, b
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __read = (undefined && undefined.__read) || function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-};
 var __values = (undefined && undefined.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
@@ -72977,13 +73000,25 @@ var __values = (undefined && undefined.__values) || function(o) {
 };
 
 
+
+
+
+var ModeEnum;
+(function (ModeEnum) {
+    ModeEnum["ROLLOUT"] = "rollout";
+    ModeEnum["DEACTIVATE"] = "deactivate";
+    ModeEnum["ACTIVATE"] = "activate";
+    ModeEnum["GET_ALL_CHANNELS_AND_VERSIONS"] = "getAllChannelsAndVersions";
+    ModeEnum["GET_LATEST_VERSION"] = "getLatestVersion";
+})(ModeEnum || (ModeEnum = {}));
 var init = function () { return src_awaiter(void 0, void 0, void 0, function () {
-    var mode, baseUrl, accessToken, LiveUpdateInstance, folderPath, channel, latestVersion, _a, major, minor, patch, version, isActivateMode, channelInput, versionInput, versionsFromServer, _b, _c, item, e_1_1, getAllBranchesResponse, _d, _e, branchItem, e_2_1, error_1;
-    var e_1, _f, e_2, _g;
-    return src_generator(this, function (_h) {
-        switch (_h.label) {
+    var mode, baseUrl, accessToken, LiveUpdateInstance, folderPath, channel, latestVersion, error_1, newVersion, uploadedVersion, isActivateMode, channelInput, versionInput, versionsFromServer, _a, _b, item, e_1_1, getAllBranchesResponse, _c, _d, branchItem, e_2_1, channel, error_2;
+    var e_1, _e, e_2, _f;
+    var _g, _h, _j, _k, _l;
+    return src_generator(this, function (_m) {
+        switch (_m.label) {
             case 0:
-                _h.trys.push([0, 29, , 30]);
+                _m.trys.push([0, 36, , 37]);
                 mode = core.getInput('mode', {
                     required: true
                 });
@@ -72994,136 +73029,150 @@ var init = function () { return src_awaiter(void 0, void 0, void 0, function () 
                     required: true
                 });
                 LiveUpdateInstance = new LiveUpdate(baseUrl, accessToken);
-                if (!(mode === 'rollout')) return [3 /*break*/, 4];
+                if (!(mode === ModeEnum.ROLLOUT)) return [3 /*break*/, 8];
                 folderPath = core.getInput('path', {
                     required: true
                 });
                 channel = core.getInput('channel', {
                     required: true
                 });
-                return [4 /*yield*/, LiveUpdateInstance.getLatestVersion(channel)];
+                latestVersion = null;
+                _m.label = 1;
             case 1:
-                latestVersion = _h.sent();
-                if (!latestVersion) {
-                    latestVersion = '1';
+                _m.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, LiveUpdateInstance.getLatestVersion(channel)];
+            case 2:
+                latestVersion = _m.sent();
+                return [3 /*break*/, 4];
+            case 3:
+                error_1 = _m.sent();
+                if (error_1 instanceof axios_AxiosError) {
+                    external_node_console_namespaceObject.warn((_h = (_g = error_1.response) === null || _g === void 0 ? void 0 : _g.data) === null || _h === void 0 ? void 0 : _h.message);
                 }
                 else {
-                    if (latestVersion.includes(".")) {
-                        _a = __read(latestVersion.split('.').map(Number), 3), major = _a[0], minor = _a[1], patch = _a[2];
-                        latestVersion = "".concat(major, ".").concat(minor, ".").concat(patch + 1);
-                    }
-                    else {
-                        version = parseInt(latestVersion);
-                        version++;
-                        latestVersion = "".concat(version);
-                    }
+                    external_node_console_namespaceObject.warn("Failed to fetch latest bundle: ".concat(error_1.message));
                 }
-                return [4 /*yield*/, LiveUpdateInstance.uploadNewRelease({ channel: channel, version: latestVersion, folderPath: folderPath })];
-            case 2:
-                _h.sent();
-                return [4 /*yield*/, LiveUpdateInstance.setBundleToUse({ channel: channel, version: latestVersion, active: true })];
-            case 3:
-                _h.sent();
-                return [2 /*return*/];
+                return [3 /*break*/, 4];
             case 4:
-                if (!(mode === 'deactivate' || mode === 'activate')) return [3 /*break*/, 18];
-                isActivateMode = mode === 'activate';
+                newVersion = updateVersion(latestVersion);
+                return [4 /*yield*/, LiveUpdateInstance.uploadNewRelease({ channel: channel, version: newVersion, folderPath: folderPath })];
+            case 5:
+                uploadedVersion = _m.sent();
+                if (!uploadedVersion) return [3 /*break*/, 7];
+                return [4 /*yield*/, LiveUpdateInstance.setBundleToUse({ channel: channel, version: newVersion, active: true })];
+            case 6:
+                _m.sent();
+                _m.label = 7;
+            case 7: return [2 /*return*/];
+            case 8:
+                if (!(mode === ModeEnum.DEACTIVATE || mode === ModeEnum.ACTIVATE)) return [3 /*break*/, 23];
+                isActivateMode = mode === ModeEnum.ACTIVATE;
                 channelInput = core.getInput('channel', {
                     required: true
                 });
                 versionInput = core.getInput('version');
-                if (!!versionInput) return [3 /*break*/, 16];
+                if (!!versionInput) return [3 /*break*/, 20];
                 return [4 /*yield*/, LiveUpdateInstance.getAllVersions(channelInput)];
-            case 5:
-                versionsFromServer = _h.sent();
-                if (!versionsFromServer) {
-                    core.setFailed('Thera are no versions for this channel. Please provide different channel');
+            case 9:
+                versionsFromServer = _m.sent();
+                if (!((_j = versionsFromServer === null || versionsFromServer === void 0 ? void 0 : versionsFromServer.bundles) === null || _j === void 0 ? void 0 : _j.length) || !((_l = (_k = versionsFromServer === null || versionsFromServer === void 0 ? void 0 : versionsFromServer.bundles[0]) === null || _k === void 0 ? void 0 : _k.bundle) === null || _l === void 0 ? void 0 : _l.version)) {
+                    core.setFailed('There are no versions for this channel. Please provide different channel');
                     return [2 /*return*/];
                 }
-                if (!isActivateMode) return [3 /*break*/, 7];
+                if (!isActivateMode) return [3 /*break*/, 11];
                 return [4 /*yield*/, LiveUpdateInstance.setBundleToUse({ channel: channelInput, version: versionsFromServer.bundles[0].bundle.version, active: isActivateMode })];
-            case 6:
-                _h.sent();
-                return [3 /*break*/, 15];
-            case 7:
-                _h.trys.push([7, 13, 14, 15]);
-                _b = __values(versionsFromServer.bundles), _c = _b.next();
-                _h.label = 8;
-            case 8:
-                if (!!_c.done) return [3 /*break*/, 12];
-                item = _c.value;
+            case 10:
+                _m.sent();
+                return [3 /*break*/, 19];
+            case 11:
+                _m.trys.push([11, 17, 18, 19]);
+                _a = __values(versionsFromServer.bundles), _b = _a.next();
+                _m.label = 12;
+            case 12:
+                if (!!_b.done) return [3 /*break*/, 16];
+                item = _b.value;
                 return [4 /*yield*/, LiveUpdateInstance.setBundleToUse({ channel: channelInput, version: item.bundle.version, active: isActivateMode })];
-            case 9:
-                _h.sent();
+            case 13:
+                _m.sent();
                 // задержка 0.5с между запросами, чтобы уменьшить шанс словить лимиты на сервере
                 return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 500); })];
-            case 10:
-                // задержка 0.5с между запросами, чтобы уменьшить шанс словить лимиты на сервере
-                _h.sent();
-                _h.label = 11;
-            case 11:
-                _c = _b.next();
-                return [3 /*break*/, 8];
-            case 12: return [3 /*break*/, 15];
-            case 13:
-                e_1_1 = _h.sent();
-                e_1 = { error: e_1_1 };
-                return [3 /*break*/, 15];
             case 14:
+                // задержка 0.5с между запросами, чтобы уменьшить шанс словить лимиты на сервере
+                _m.sent();
+                _m.label = 15;
+            case 15:
+                _b = _a.next();
+                return [3 /*break*/, 12];
+            case 16: return [3 /*break*/, 19];
+            case 17:
+                e_1_1 = _m.sent();
+                e_1 = { error: e_1_1 };
+                return [3 /*break*/, 19];
+            case 18:
                 try {
-                    if (_c && !_c.done && (_f = _b.return)) _f.call(_b);
+                    if (_b && !_b.done && (_e = _a.return)) _e.call(_a);
                 }
                 finally { if (e_1) throw e_1.error; }
                 return [7 /*endfinally*/];
-            case 15: return [2 /*return*/];
-            case 16: return [4 /*yield*/, LiveUpdateInstance.setBundleToUse({ channel: channelInput, version: versionInput, active: isActivateMode })];
-            case 17:
-                _h.sent();
-                return [2 /*return*/];
-            case 18:
-                if (!(mode === 'getAllChannelsAndVersions')) return [3 /*break*/, 28];
+            case 19: return [3 /*break*/, 22];
+            case 20: return [4 /*yield*/, LiveUpdateInstance.setBundleToUse({ channel: channelInput, version: versionInput, active: isActivateMode })];
+            case 21:
+                _m.sent();
+                _m.label = 22;
+            case 22: return [2 /*return*/];
+            case 23:
+                if (!(mode === ModeEnum.GET_ALL_CHANNELS_AND_VERSIONS)) return [3 /*break*/, 33];
                 return [4 /*yield*/, LiveUpdateInstance.getAllBranches()];
-            case 19:
-                getAllBranchesResponse = _h.sent();
+            case 24:
+                getAllBranchesResponse = _m.sent();
                 if (!getAllBranchesResponse) {
                     return [2 /*return*/];
                 }
-                console.log("Branches:\n".concat(JSON.stringify(getAllBranchesResponse.branches, null, 2), "\n\n"));
-                _h.label = 20;
-            case 20:
-                _h.trys.push([20, 25, 26, 27]);
-                _d = __values(getAllBranchesResponse.branches), _e = _d.next();
-                _h.label = 21;
-            case 21:
-                if (!!_e.done) return [3 /*break*/, 24];
-                branchItem = _e.value;
-                return [4 /*yield*/, LiveUpdateInstance.getAllVersions(branchItem.branch)];
-            case 22:
-                _h.sent();
-                _h.label = 23;
-            case 23:
-                _e = _d.next();
-                return [3 /*break*/, 21];
-            case 24: return [3 /*break*/, 27];
+                external_node_console_namespaceObject.log("Branches:\n".concat(JSON.stringify(getAllBranchesResponse.branches, null, 2), "\n\n"));
+                _m.label = 25;
             case 25:
-                e_2_1 = _h.sent();
-                e_2 = { error: e_2_1 };
-                return [3 /*break*/, 27];
+                _m.trys.push([25, 30, 31, 32]);
+                _c = __values(getAllBranchesResponse.branches), _d = _c.next();
+                _m.label = 26;
             case 26:
+                if (!!_d.done) return [3 /*break*/, 29];
+                branchItem = _d.value;
+                return [4 /*yield*/, LiveUpdateInstance.getAllVersions(branchItem.branch)];
+            case 27:
+                _m.sent();
+                _m.label = 28;
+            case 28:
+                _d = _c.next();
+                return [3 /*break*/, 26];
+            case 29: return [3 /*break*/, 32];
+            case 30:
+                e_2_1 = _m.sent();
+                e_2 = { error: e_2_1 };
+                return [3 /*break*/, 32];
+            case 31:
                 try {
-                    if (_e && !_e.done && (_g = _d.return)) _g.call(_d);
+                    if (_d && !_d.done && (_f = _c.return)) _f.call(_c);
                 }
                 finally { if (e_2) throw e_2.error; }
                 return [7 /*endfinally*/];
-            case 27: return [2 /*return*/];
-            case 28:
-                core.setFailed('Invalid mode. Please provide a valid mode: rollout or rollback');
-                return [3 /*break*/, 30];
-            case 29:
-                error_1 = _h.sent();
-                core.setFailed(error_1.message);
-                return [3 /*break*/, 30];
-            case 30: return [2 /*return*/];
+            case 32: return [2 /*return*/];
+            case 33:
+                if (!(mode === ModeEnum.GET_LATEST_VERSION)) return [3 /*break*/, 35];
+                channel = core.getInput('channel', {
+                    required: true
+                });
+                return [4 /*yield*/, LiveUpdateInstance.getLatestVersion(channel)];
+            case 34:
+                _m.sent();
+                return [2 /*return*/];
+            case 35:
+                core.setFailed("Invalid mode. Please provide a valid mode:".concat(Object.values(ModeEnum).join(', ')));
+                return [3 /*break*/, 37];
+            case 36:
+                error_2 = _m.sent();
+                core.setFailed(error_2.message);
+                return [3 /*break*/, 37];
+            case 37: return [2 /*return*/];
         }
     });
 }); };

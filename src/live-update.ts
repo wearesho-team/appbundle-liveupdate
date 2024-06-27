@@ -3,7 +3,8 @@ import FormData from 'form-data'
 import { createReadStream } from 'node:fs'
 import { isZipped, zipFolder } from './helpers/zip.js'
 import axios, {AxiosError, AxiosInstance} from 'axios'
-import {getAllBranchesResponse, GetAllVersionsResponse} from "./types";
+import {GetAllBranchesResponse, GetAllVersionsResponse} from "./types";
+import {updateVersion} from "./helpers/update-version";
 
 
 export class LiveUpdate {
@@ -19,9 +20,9 @@ export class LiveUpdate {
         });
     }
 
-    getAllBranches = async ():Promise<getAllBranchesResponse | undefined> => {
+    getAllBranches = async ():Promise<GetAllBranchesResponse | undefined> => {
         try {
-            const response = await this.api.get<getAllBranchesResponse>('branches');
+            const response = await this.api.get<GetAllBranchesResponse>('branches');
             return response.data;
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -38,12 +39,14 @@ export class LiveUpdate {
         const response = await this.api.get(
             `latest?branch=${channel}`
         );
+        const version = response.data?.bundle?.bundle?.version;
 
         core.info('Latest bundle successfully fetched');
         core.info(`Response: ${JSON.stringify(response.data, null, 2)}`);
-        core.info(`Bundle ID: ${response.data?.bundle?.bundle?.version}`);
-        core.setOutput('latestVersionOnServer', response.data?.bundle?.bundle?.version);
-        return response.data?.bundle?.bundle?.version;
+        core.setOutput('latestVersionOnServer', version);
+        core.setOutput('nextVersionOnServer', updateVersion(version));
+
+        return version;
     }
 
     getLatestVersion = async (channel: string): Promise<string | null> => {
@@ -51,7 +54,15 @@ export class LiveUpdate {
 
         const allVersions = await this.getAllVersions(channel);
 
-        return allVersions?.bundles[0].bundle.version || null;
+        let version: string | null = null;
+        if (allVersions?.bundles?.length && allVersions?.bundles?.length > 0) {
+            version = allVersions.bundles[0].bundle?.version || null;
+        }
+
+        core.setOutput('latestVersionOnServer', version);
+        core.setOutput('nextVersionOnServer', updateVersion(version));
+
+        return version;
     }
 
     getAllVersions = async (channel: string): Promise<GetAllVersionsResponse | null> => {

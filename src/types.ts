@@ -1,4 +1,4 @@
-export type getAllBranchesResponse = {
+export type GetAllBranchesResponse = {
     "branches": Array<{ "branch": string, "count": number }>
 };
 

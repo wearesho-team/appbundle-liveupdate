@@ -2,18 +2,14 @@ import * as core from '@actions/core'
 import {LiveUpdate} from "./live-update";
 import {AxiosError} from "axios";
 import * as console from "node:console";
+import {updateVersion} from "./helpers/update-version";
 
-const updateVersion = (version: string | null) => {
-    if (!version) {
-        return '1';
-    }
-
-    if(version.includes(".")) {
-        const [major, minor, patch] = version.split('.').map(Number);
-        return `${major}.${minor}.${patch + 1}`;
-    }
-
-    return `${parseInt(version) + 1}`;
+export enum ModeEnum {
+    ROLLOUT = 'rollout',
+    DEACTIVATE = 'deactivate',
+    ACTIVATE = 'activate',
+    GET_ALL_CHANNELS_AND_VERSIONS = 'getAllChannelsAndVersions',
+    GET_LATEST_VERSION = 'getLatestVersion',
 }
 
 const init = async () => {
@@ -30,7 +26,7 @@ const init = async () => {
 
     const LiveUpdateInstance: LiveUpdate = new LiveUpdate(baseUrl, accessToken);
 
-    if (mode === 'rollout') {
+    if (mode === ModeEnum.ROLLOUT) {
         const folderPath: string = core.getInput('path', {
           required: true
         })
@@ -50,19 +46,19 @@ const init = async () => {
           }
         }
 
-        latestVersion = updateVersion(latestVersion);
+        const newVersion:string = updateVersion(latestVersion);
 
-        const uploadedVersion: string | null = await LiveUpdateInstance.uploadNewRelease({channel, version: latestVersion, folderPath});
+        const uploadedVersion: string | null = await LiveUpdateInstance.uploadNewRelease({channel, version: newVersion, folderPath});
 
         if (uploadedVersion) {
-            await LiveUpdateInstance.setBundleToUse({channel, version: latestVersion, active: true});
+            await LiveUpdateInstance.setBundleToUse({channel, version: newVersion, active: true});
         }
 
         return;
     }
 
-    if (mode === 'deactivate' || mode === 'activate') {
-        const isActivateMode: boolean = mode === 'activate';
+    if (mode === ModeEnum.DEACTIVATE || mode === ModeEnum.ACTIVATE) {
+        const isActivateMode: boolean = mode === ModeEnum.ACTIVATE;
         const channelInput: string = core.getInput('channel', {
           required: true
         });
@@ -71,8 +67,8 @@ const init = async () => {
         if (!versionInput) {
             const versionsFromServer = await LiveUpdateInstance.getAllVersions(channelInput);
 
-            if (!versionsFromServer) {
-                core.setFailed('Thera are no versions for this channel. Please provide different channel');
+            if (!versionsFromServer?.bundles?.length || !versionsFromServer?.bundles[0]?.bundle?.version) {
+                core.setFailed('There are no versions for this channel. Please provide different channel');
                 return;
             }
 
@@ -85,15 +81,14 @@ const init = async () => {
                     await new Promise(resolve => setTimeout(resolve, 500));
                 }
             }
-
-            return;
         } else {
             await LiveUpdateInstance.setBundleToUse({channel: channelInput, version: versionInput, active: isActivateMode});
-            return;
         }
+
+        return;
     }
 
-    if (mode === 'getAllChannelsAndVersions') {
+    if (mode === ModeEnum.GET_ALL_CHANNELS_AND_VERSIONS) {
         const getAllBranchesResponse = await LiveUpdateInstance.getAllBranches();
 
         if (!getAllBranchesResponse) {
@@ -107,7 +102,17 @@ const init = async () => {
         return;
     }
 
-    core.setFailed('Invalid mode. Please provide a valid mode: rollout or rollback');
+    if (mode === ModeEnum.GET_LATEST_VERSION) {
+        const channel: string = core.getInput('channel', {
+            required: true
+        })
+
+        await LiveUpdateInstance.getLatestVersion(channel);
+
+        return;
+    }
+
+    core.setFailed(`Invalid mode. Please provide a valid mode:${Object.values(ModeEnum).join(', ')}`);
   } catch (error) {
     core.setFailed(error.message)
   }
